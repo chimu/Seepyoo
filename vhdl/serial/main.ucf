@@ -54,8 +54,11 @@ NET "switches[5]" LOC = "K3";
 NET "switches[6]" LOC = "L3";
 NET "switches[7]" LOC = "P11";
 
-NET "clk_btn" LOC = "A7";
-NET "clk_btn" CLOCK_DEDICATED_ROUTE = FALSE;
+NET "button[0]" LOC = "A7";
+NET "button[1]" LOC = "M4";
+NET "button[2]" LOC = "C11";
+NET "button[3]" LOC = "G12";
+NET "button<3>" CLOCK_DEDICATED_ROUTE = FALSE;
 
 
 

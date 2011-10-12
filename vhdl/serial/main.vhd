@@ -46,8 +46,7 @@ entity main is
     		  WR : IN  STD_LOGIC;			  
       --     E : out  STD_LOGIC;
 			  switches: IN STD_LOGIC_VECTOR ( 7 DOWNTO 0);
-			  clk_btn: IN STD_LOGIC;
-			  
+			  button: IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 			  leds : out STD_LOGIC_VECTOR (7 DOWNTO 0)
 			  );
 end main;
@@ -85,13 +84,15 @@ signal DSerial, outs : std_logic_vector(7 downto 0):=X"00";
 signal INPs : std_logic_vector(7 downto 0):=X"00";
 signal EDL : std_logic := '0';
 signal derpvider : std_logic_vector(24 DOWNTO 0);
-signal strobe, dotrans, ahyeah : std_logic := '0';
+signal strobe, dotrans : std_logic := '0';
 
-signal packet_data : std_logic_vector(39 DOWNTO 0);
+signal packet_data : std_logic_vector(39 DOWNTO 0):=X"0000000000";
 
-type STATE is (RECV_HEADER, RECV_ADDRESS1, RECV_ADDRESS2 , RECV_DATA1, RECV_DATA2, EXECUTE);
+type STATE is (RECV_HEADER, RECV_ADDRESS1, RECV_ADDRESS2 , RECV_DATA1, RECV_DATA2);
+type EXEC_STATE is (EXECUTE, NOEXECUTE);
 
 signal cur_state, next_state : STATE := RECV_HEADER;
+signal cur_exec, next_exec : EXEC_STATE := NOEXECUTE;
 
 begin
 MUART : Minimal_UART_CORE port map(CLOCK, EDL, DSerial, RXD, TXD, EOT, INPS, READY, WRT);
@@ -103,61 +104,62 @@ EOC<=EDL;
 --WRT<=WR; -- The DECOD component send data to the transmitter
 
 process (CLOCK)
-begin	
+begin
+
+end process;
+
+process (EDL, CLOCK)
+begin
 	if rising_edge(CLOCK) then
 		cur_state <= next_state;
-		--if (EDL='1') then
-			--if (DSERIAL=X"5C") then
-			--	RS_S<='0';
-			--elsif (DSERIAL=X"5D") then
-			--	RS_S<='1';
-			--end if;	
-			--outs <= DSerial;
-		--end if;
+		cur_exec <= next_exec;
 		
-		derpvider <= derpvider + "1";
-	
-		if EDL = '1' THEN
-			outs <= DSerial;
+		if cur_exec = EXECUTE then
+			--Send instruction or data to bus...
+			
 		end if;
 		
-		
-		if derpvider = "0" THEN
-			--INPS <= X"21";
-			--WRT <= '1';
-			strobe <= NOT strobe;
-		else
-			WRT <= '0';
-		end if;
-		
+	end if;
+	if rising_edge(EDL) then
+		outs <= DSerial;
 		if cur_state = RECV_HEADER then
 			packet_data(39 DOWNTO 32) <= outs;
 			next_state <= RECV_ADDRESS1;
+			next_exec <= NOEXECUTE;
 		elsif cur_state = RECV_ADDRESS1 then
 			packet_data(31 DOWNTO 24) <= outs;
 			next_state <= RECV_ADDRESS2;
+			next_exec <= NOEXECUTE;
 		elsif cur_state = RECV_ADDRESS2 then
 			packet_data(23 DOWNTO 16) <= outs;
 			next_state <= RECV_DATA1;
+			next_exec <= NOEXECUTE;
 		elsif cur_state = RECV_DATA1 then
 			packet_data(15 DOWNTO 8) <= outs;
 			if packet_data(32) = '1' then --if the header indicates an instruction
 				next_state <= RECV_DATA2;
+				next_exec <= NOEXECUTE;
 			else
-				next_state <= EXECUTE;
+				next_exec <= EXECUTE;
+				next_state <= RECV_HEADER;
 			end if;
 		elsif cur_state = RECV_DATA2 then
 			packet_data(7 DOWNTO 0) <= outs;
-			next_state <= EXECUTE;
+			next_state <= RECV_HEADER;
+			next_exec <= EXECUTE;
 		end if;
-		
-		
-
 	end if;
+	
 end process;
 
 		
-leds <= "0000000" & strobe;
+leds <= packet_data(39 DOWNTO 32) when button(0) = '1' 
+	else packet_data(31 DOWNTO 24) when button(1) = '1'
+	else packet_data(23 DOWNTO 16) when button(2) = '1'
+	else packet_data(15 DOWNTO 8) when button(3) = '1'
+	else X"00";
+
+--leds <= "0000" & button;
 
 --leds <= outs;
 --leds (7 DOWNTO 1) <= "0000000";
