@@ -21,12 +21,13 @@ PORT(	clock		:	IN 	std_logic;
 		r_NOTw	:	IN		std_logic;	-- read_not_write
 		addr		:	IN		std_logic_vector(15	DOWNTO 0);
 		d_in		:	IN 	std_logic_vector(7	DOWNTO 0);
-		d_out		:	OUT	std_logic_vector(7	DOWNTO 0);
+		d_out		:	OUT	std_logic_vector(7	DOWNTO 0)
 );
+END ENTITY;
 
-ARCHITECTURE arch OF rom IS
+ARCHITECTURE arch OF ram IS
 	TYPE ram IS ARRAY (128 to 65535) OF
-							std_logic_vector(7 DOWNTO 0)
+							std_logic_vector(7 DOWNTO 0);
 	SIGNAL tmp_ram: ram;
 	
 BEGIN
