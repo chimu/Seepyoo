@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+-- Company: N\A
+-- Engineer: Pual Davey
+--           Henry Wilkinson
 -- 
 -- Create Date:    15:32:42 10/12/2011 
 -- Design Name: 	Seepyoo microcontroller
@@ -8,7 +9,7 @@
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
--- Description: 
+-- Description: ALU for simple CPU
 --
 -- Dependencies: 
 --
